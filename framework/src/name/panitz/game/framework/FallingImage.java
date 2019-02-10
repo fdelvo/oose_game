@@ -1,7 +1,7 @@
 package name.panitz.game.framework;
 
 public class FallingImage<I> extends ImageObject<I> {
-	static double G = 60;
+	static double G = 30;
 	double v0;
 	int t = 0;
 
