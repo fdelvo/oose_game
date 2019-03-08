@@ -12,23 +12,35 @@ public class Escape<I, S> extends AbstractGame<I, S> {
     List<Weapon<I>> weapons = new ArrayList<>();
     Player<I> dude;
     List<Floor<I>> floor = new ArrayList<>();
-    TextObject<I> infoText
+    List<GameObject<I>> background = new ArrayList<>();
+    int score = 0;
+
+    TextObject<I> scoreText
             = new TextObject<>(new Vertex(30, 35)
-            , "Kleines Beispielspiel", "Helvetica", 28);
+            , "Score:" + score, "Helvetica", 28);
+
+    TextObject<I> healthText
+            = new TextObject<>(new Vertex(30, 60)
+            , "Health:", "Helvetica", 28);
 
     SoundObject<S> outch = new SoundObject<>("outch.wav");
 
     public Escape() {
-        super(new Player<>(new Vertex(0, 400), null, 100), 800, 600);
+        super(new Player<>(new Vertex(10, 450), null, 100), 800, 600);
 
         dude = (Player<I>) getPlayer();
-
+        healthText.text = "Health: " + dude.health;
+        background.add(scoreText);
+        background.add(healthText);
         floor.add(new Floor<>(new Vertex(0, 500)));
 
+        enemies.add(new Enemy<>(new Vertex(getWidth(),400), 100, null));
 
-        projectiles.add(new Projectile<>(new Vertex(800, 450), new Vertex(3, 0), 10));
+        projectiles.add(new Projectile<>(new Vertex(800, 401), new Vertex(3, 0), 10));
         getGOss().add(floor);
         getGOss().add(projectiles);
+        getGOss().add(enemies);
+        getGOss().add(background);
         getButtons().add(new Button("Pause", () -> pause()));
         getButtons().add(new Button("Start", () -> start()));
         getButtons().add(new Button("Exit", () -> System.exit(0)));
@@ -41,13 +53,50 @@ public class Escape<I, S> extends AbstractGame<I, S> {
                 System.out.println("Touches floor");
                 return;
             }
+            if(dude.getPos().x <= 0.0 || dude.getPos().x >= this.getWidth() - dude.getWidth()) {
+                dude.stopSidewaysMovement();
+                System.out.println("Stop");
+            }
+        }
+    }
+
+    private void checkEnemyWallCollsions() {
+        for (Enemy<I> g : enemies) {
+            if (g.getPos().x+g.getWidth()<0) {
+                g.getPos().x = getWidth();
+            }
+            if (dude.touches(g)){
+                g.getPos().moveTo(new Vertex(getWidth()+10,g.getPos().y));
+                dude.health = dude.health - 10;
+                healthText.text = "Health: " + dude.health;
+                System.out.println("Hit");
+            }
+            for (GameObject<I> floor : floor) {
+                if (g.touches(floor) && (g.getVelocity().y > 0 || g.getVelocity().y <0)) {
+                    g.getVelocity().y = 0.0;
+                }
+            }
+            for (Projectile<I> p: projectiles) {
+                if (p.touches(g)) {
+                    p.getPos().x = 0-p.getWidth();
+                    p.getVelocity().x = -1;
+                    g.health = g.health - p.damage;
+                    if (g.health == 0) {
+                        score++;
+                        scoreText.text = "Score: " + score;
+                        g.getPos().x = getWidth();
+                        g.health = 100;
+                    }
+                }
+            }
         }
     }
 
     private void checkPlayerProjectileCollision() {
-        for (GameObject<I> p : projectiles) {
+        for (Projectile<I> p : projectiles) {
             if (dude.touches(p)) {
-                dude.health = dude.health - 10;
+                dude.health = dude.health - p.damage;
+                healthText.text = "Health: " + dude.health;
                 p.getPos().moveTo(new Vertex(-1000, p.getPos().y));
                 System.out.println(dude.health);
                 return;
@@ -59,13 +108,18 @@ public class Escape<I, S> extends AbstractGame<I, S> {
     public void doChecks() {
         checkPlayerProjectileCollision();
         checkPlayerWallCollsions();
-        System.out.println(player.getVelocity());
+        checkEnemyWallCollsions();
+        isStopped();
+        if (dude.health == 0) {
+            background.add(new TextObject<>(new Vertex(getWidth()/2, getHeight()/2)
+                    , "Game Over", "Helvetica", 28));
+        }
     }
 
-  /*@Override
+
   public boolean isStopped() {
-    return super.isStopped() || stiche>=10;
-  }*/
+    return super.isStopped() || dude.health==0;
+  }
 
     @Override
     public void keyPressedReaction(KeyCode keycode) {

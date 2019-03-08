@@ -9,6 +9,6 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="framework" />
     <orderEntry type="module" module-name="swingBackend" />
-    <orderEntry type="library" name="lib" level="project" />
+    <orderEntry type="library" name="lib" level="application" />
   </component>
 </module>

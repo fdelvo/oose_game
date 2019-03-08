@@ -11,5 +11,6 @@
     <orderEntry type="module" module-name="javafxBackend" />
     <orderEntry type="module" module-name="framework" />
     <orderEntry type="module" module-name="escape" />
+    <orderEntry type="library" name="lib" level="application" />
   </component>
 </module>

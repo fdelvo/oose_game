@@ -15,7 +15,7 @@ public class Player<I> extends FallingImage<I> {
   }
 
   public void fire(List<Projectile<I>> projectile) {
-    projectile.add(new Projectile<>(new Vertex(this.getPos().x + this.getWidth(), this.getPos().y), new Vertex(2,0), 10));
+    projectile.add(new Projectile<>(new Vertex(this.getPos().x + this.getWidth() + 5, this.getPos().y), new Vertex(3,0), 10));
     System.out.println("Added");
   }
 }
